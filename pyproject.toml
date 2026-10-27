@@ -1,0 +1,42 @@
+[project]
+name = "rain-radar"
+version = "1.0.0"
+description = "Shows your current location on a map with the latest RainViewer precipitation radar."
+requires-python = ">=3.12"
+authors = [
+    { name = "hhfritz", email = "hans-henning.fritz@gmx.de" }
+]
+dependencies = [
+    "flet",
+    "flet-geolocator",
+    "flet-webview",
+    "httpx2"
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli",
+    "flet-desktop",
+    "flet-web"
+]
+
+[tool.flet.metadata]
+title = "Rain Radar"
+
+[tool.flet]
+org = "dev.flet"
+company = "hhfritz"
+copyright = "Copyright (C) 2026 by hhfritz"
+icon_background = "#F4F8FB"
+
+[tool.flet.splash]
+color = "#F4F8FB"
+dark_color = "#F4F8FB"
+
+[tool.flet.android.permission]
+"android.permission.INTERNET" = true
+"android.permission.ACCESS_COARSE_LOCATION" = true
+"android.permission.ACCESS_FINE_LOCATION" = true
+
+[tool.flet.app]
+path = "src"
