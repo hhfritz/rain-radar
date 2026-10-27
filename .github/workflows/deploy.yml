@@ -3,7 +3,7 @@ name: Deploy Flet App to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   contents: read
