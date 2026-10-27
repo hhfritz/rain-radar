@@ -33,11 +33,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       - name: Install dependencies with uv
         run: |
-          uv sync
+          uv sync --all-extras
+          uv pip install flet  # Garantiert, dass die Flet-CLI verfügbar ist
 
       - name: Publish Flet App to Web (Static)
         run: |
