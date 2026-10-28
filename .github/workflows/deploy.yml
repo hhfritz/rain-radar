@@ -42,7 +42,7 @@ jobs:
 
       - name: Publish Flet App to Web (Static)
         run: |
-          uv run flet publish main.pys
+          uv run flet publish main.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
