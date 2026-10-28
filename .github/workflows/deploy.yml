@@ -42,7 +42,8 @@ jobs:
 
       - name: Publish Flet App to Web (Static)
         run: |
-          uv run flet publish src/main.py --base-url /rain-radar/ --route-url-strategy path
+          uv run flet publish src/main.py --base-url /rain-radar/
+          sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
           
           # Korrigiert den Asset-Base-Path in der generierten flutter_bootstrap.js
           sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/flutter_bootstrap.js || true
