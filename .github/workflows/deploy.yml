@@ -43,6 +43,8 @@ jobs:
       - name: Publish Flet App to Web (Static)
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
+          
+          sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
 
           # Fix für Asset- & FontManifest-Pfade in Flutter/Flet Web auf GitHub Pages
           sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/flutter_bootstrap.js
