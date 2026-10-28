@@ -42,7 +42,7 @@ jobs:
 
       - name: Publish Flet App to Web (Static)
         run: |
-          uv run flet publish main.py --base-url /${{ github.event.repository.name }}/
+          uv run flet publish src/main.py --base-url /${{ github.event.repository.name }}/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
