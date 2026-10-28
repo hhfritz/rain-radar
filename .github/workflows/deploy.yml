@@ -43,11 +43,12 @@ jobs:
       - name: Publish Flet App to Web (Static)
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
-          sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
-          
-          # Korrigiert den Asset-Base-Path in der generierten flutter_bootstrap.js
-          sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/flutter_bootstrap.js || true
-          sed -i 's/"assetBase": ""/"assetBase": "\/rain-radar\/"/g' dist/flutter_bootstrap.js || true
+
+         # Fix für Asset- & FontManifest-Pfade in Flutter/Flet Web auf GitHub Pages
+         sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/flutter_bootstrap.js
+         sed -i 's/"assetBase":""/"assetBase":"\/rain-radar\/"/g' dist/flutter_bootstrap.js
+         sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' dist/flutter_bootstrap.js || true
+         sed -i 's/"start_url": "\/"/"start_url": "\/rain-radar\/"/g' dist/manifest.json || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
