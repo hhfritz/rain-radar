@@ -44,11 +44,17 @@ jobs:
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
           
-          # Base-Tag in index.html anpassen
+          # 1. Base-Tag anpassen
           sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' dist/index.html
           
-          # assetBase in flutter_bootstrap.js setzen
-          sed -i 's/\{\}/{"assetBase":"\/rain-radar\/"}/g' dist/flutter_bootstrap.js || true
+          # 2. Die Flet-Konfigurationsvariablen in index.html korrigieren
+          sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' dist/index.html
+          sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' dist/index.html
+          sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' dist/index.html
+          sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' dist/index.html
+          
+          # 3. Bootstrapper im JS-Code korrigieren
+          find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
