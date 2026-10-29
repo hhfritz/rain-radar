@@ -3,18 +3,23 @@ import logging
 from datetime import datetime, timezone
 
 import flet as ft
-import flet_geolocator as fgeo
 
-from rainviewer_api import available_radar_frames
+# Webview und Geolocator sicher importieren (verhindert Pyodide-Absturz im Web)
+try:
+    import flet_geolocator as fgeo
 
-# flet_webview nur importieren, wenn wir NICHT im Browser laufen
-# (Verhindert das lautlose Abstürzen des Pyodide Workers)
+    HAS_GEOLOCATOR = True
+except ImportError:
+    HAS_GEOLOCATOR = False
+
 try:
     import flet_webview as fweb
 
     HAS_WEBVIEW = True
 except ImportError:
     HAS_WEBVIEW = False
+
+from rainviewer_api import available_radar_frames
 
 LOG_LEVEL = logging.INFO
 logging.basicConfig(format="%(levelname)s %(name)s: %(message)s")
@@ -25,13 +30,12 @@ async def main(page: ft.Page):
     page.title = "Rain Radar"
     page.theme_mode = ft.ThemeMode.SYSTEM
 
-    geolocator = fgeo.Geolocator()
-    page.services.append(geolocator)  # In Flet 1.0 notwendig
+    is_web = page.web
 
-    status = ft.Text("Checking location access…")
+    status = ft.Text("App gestartet…")
     coordinates = ft.Text("")
     frame_label = ft.Text("")
-    refresh_button = ft.Button(content=ft.Text("Check location and refresh"))
+    refresh_button = ft.Button(content=ft.Text("Refresh"))
     play_button = ft.Button(content=ft.Text("Play"), disabled=True)
 
     frame_slider = ft.Slider(
@@ -43,26 +47,33 @@ async def main(page: ft.Page):
         visible=False,
     )
 
-    is_web = page.web
-
+    # Kartenbereich für Web vs. App
     if is_web or not HAS_WEBVIEW:
         map_area = ft.Container(
-            content=ft.Text("Kartenansicht im Web wird geladen..."),
+            content=ft.Text(
+                "Die interaktive Kartenansicht ist auf Mobilgeräten verfügbar.",
+                color=ft.Colors.GREY_700,
+            ),
+            padding=20,
+            alignment=ft.alignment.center,
             expand=True,
         )
-        webview = None
     else:
         webview = fweb.WebView(expand=True)
         map_area = webview
 
-    frames: list[dict] = []
-    observed_count = 0
-    current_frame = 0
-    playback_active = False
-
     async def refresh_location(e=None):
-        status.value = "Anwendung bereit."
+        status.value = "Daten werden abgerufen…"
         page.update()
+        try:
+            # Beispielhafte Radar-Frames von API laden
+            frames, observed_count, tile_host = await available_radar_frames()
+            status.value = f"Radar bereit · {len(frames)} Frames geladen."
+        except Exception as exc:
+            log.exception("Fehler beim Abrufen der Radar-Daten")
+            status.value = f"Fehler: {exc}"
+        finally:
+            page.update()
 
     refresh_button.on_click = refresh_location
 
@@ -74,7 +85,8 @@ async def main(page: ft.Page):
                     ft.Text("Rain Radar", size=24, weight="bold"),
                     status,
                     coordinates,
-                    refresh_button,
+                    ft.Row([refresh_button, play_button]),
+                    frame_slider,
                     map_area,
                 ],
                 expand=True,
@@ -83,9 +95,9 @@ async def main(page: ft.Page):
     )
 
     if is_web:
-        status.value = "Web App erfolgreich gestartet!"
+        status.value = "Rain Radar Web App erfolgreich geladen!"
         page.update()
 
 
-# Richtiger Starter für Web/Pyodide
+# WICHTIG FÜR PYODIDE / WEB: ft.app statt ft.run verwenden!
 ft.app(target=main)
