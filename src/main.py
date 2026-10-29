@@ -93,17 +93,18 @@ async def main(page: ft.Page):
     await refresh_location()
 
 
-# Am Ende von src/main.py:
-
-if __name__ == "__main__":
-    if hasattr(ft, "app_async"):
-        ft.app_async(target=main)
-    elif hasattr(ft, "app") and callable(getattr(ft, "app")):
-        ft.app(target=main)
-    else:
-        # Flet 0.25+ / 1.0 WebAssembly Modulstruktur
-        try:
-            from flet.app import run_async
-            run_async(target=main)
-        except ImportError:
-            ft.run(main)
+# # Am Ende von src/main.py:
+#
+# if __name__ == "__main__":
+#     if hasattr(ft, "app_async"):
+#         ft.app_async(target=main)
+#     elif hasattr(ft, "app") and callable(getattr(ft, "app")):
+#         ft.app(target=main)
+#     else:
+#         # Flet 0.25+ / 1.0 WebAssembly Modulstruktur
+#         try:
+#             from flet.app import run_async
+#             run_async(target=main)
+#         except ImportError:
+#             ft.run(main)
+ft.run(main)
