@@ -42,24 +42,26 @@ jobs:
 
       - name: Clean previous build artifacts
         run: |
-          rm -rf dist
-          rm -rf src/dist
+          rm -rf dist src/dist
 
-      - name: Publish Flet App to Web (Static)
-        run: |
-          uv run flet publish src/main.py --base-url /rain-radar/
-          
-          # 1. Base-Tag anpassen
-          sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' dist/index.html
-          
-          # 2. Die Flet-Konfigurationsvariablen in index.html korrigieren
-          sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' dist/index.html
-          sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' dist/index.html
-          sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' dist/index.html
-          sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' dist/index.html
-          
-          # 3. Bootstrapper im JS-Code korrigieren
-          find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
+          - name: Publish Flet App to Web (Static)
+            run: |
+              uv run flet publish src/main.py --base-url /rain-radar/
+              
+              # 1. Pfade in der im src/-Ordner generierten index.html anpassen
+              sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' src/dist/index.html
+              
+              # 2. Flet Configuration & Base-URLs in src/dist korrigieren
+              sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' src/dist/index.html
+              sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' src/dist/index.html
+              sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' src/dist/index.html
+              sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' src/dist/index.html
+              
+              # 3. Bootstrapper-Konfigurationen in JS/JSON anpassen
+              find src/dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
+              
+              # 4. Generierten Build-Ordner auf Root-Ebene verschieben für Pages
+              mv src/dist dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
