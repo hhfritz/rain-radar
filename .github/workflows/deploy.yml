@@ -44,12 +44,13 @@ jobs:
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
           
-          # Rekursiver Pfad-Fix für alle generierten Dateien im dist-Ordner
-          find dist -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
-          find dist -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" \) -exec sed -i 's/"assetBase":""/"assetBase":"\/rain-radar\/"/g' {} +
-          find dist -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" \) -exec sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' {} +
-          find dist -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" \) -exec sed -i 's/"assets\/FontManifest.json"/"rain-radar\/assets\/FontManifest.json"/g' {} +
-          find dist -type f \( -name "*.js" -o -name "*.html" -o -name "*.json" \) -exec sed -i 's/"start_url": "\/"/"start_url": "\/rain-radar\/"/g' {} +
+          # 1. Zwingt den Browser, ALLE Ressourcen im Unterordner /rain-radar/ zu suchen
+          sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
+          sed -i 's/<base href="">/<base href="\/rain-radar\/">/g' dist/index.html
+          
+          # 2. Korrigiert Pfade in den JS- und JSON-Dateien
+          find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
+          find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' {} +
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
