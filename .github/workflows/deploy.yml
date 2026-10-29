@@ -46,8 +46,8 @@ jobs:
 
       - name: Export requirements from uv and publish Flet App
         run: |
-          # 1. Erzeuge eine explizite requirements.txt im src/-Ordner
-          uv export --format requirements-txt --no-dev -o src/requirements.txt
+          # 1. requirements.txt OHNE Hashes exportieren für Pyodide/micropip
+          uv export --format requirements-txt --no-dev --no-hashes -o src/requirements.txt
           
           # 2. Flet Publish ausführen
           uv run flet publish src/main.py --base-url /rain-radar/
