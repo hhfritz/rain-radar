@@ -1070,7 +1070,7 @@ dev = [
 requires-dist = [
     { name = "flet" },
     { name = "flet-geolocator" },
-    { name = "flet-map", specifier = ">=1.0.4" },
+    { name = "flet-map" },
     { name = "httpx" },
 ]
 

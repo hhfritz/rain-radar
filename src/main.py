@@ -12,6 +12,13 @@ logging.basicConfig(format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app.main")
 
 
+import asyncio
+import logging
+import flet as ft
+import flet_map as fm
+
+# ... [dein bisheriger Code] ...
+
 async def main(page: ft.Page):
     page.title = "Rain Radar"
     page.theme_mode = ft.ThemeMode.SYSTEM
@@ -21,17 +28,18 @@ async def main(page: ft.Page):
     refresh_button = ft.Button(content=ft.Text("Neu laden"))
     play_button = ft.Button(content=ft.Text("Play"), disabled=True)
 
-    # Nativer Flet-Kartenbereich (funktioniert im Web und in Android)
+    # Radar-Kachelebene
     radar_tile_layer = fm.TileLayer(
         url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         opacity=0.65,
     )
 
+    # Korrigierte Map-Konfiguration mit MapOptions
     map_control = fm.Map(
         expand=True,
-        configuration=fm.MapConfiguration(
-            initial_center=fm.MapLatitudeLongitude(48.7758, 9.1829),  # Standard-Koordinate
-            initial_zoom=8,
+        configuration=fm.MapOptions(
+            center=fm.MapLatitudeLongitude(48.7758, 9.1829),  # oder (48.7758, 9.1829)
+            zoom=8,
         ),
         layers=[
             fm.TileLayer(
