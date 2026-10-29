@@ -40,6 +40,11 @@ jobs:
           uv sync --all-extras
           uv pip install flet  # Garantiert, dass die Flet-CLI verfügbar ist
 
+      - name: Clean previous build artifacts
+        run: |
+          rm -rf dist
+          rm -rf src/dist
+
       - name: Publish Flet App to Web (Static)
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
