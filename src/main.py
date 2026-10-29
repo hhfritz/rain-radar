@@ -34,13 +34,11 @@ async def main(page: ft.Page):
         opacity=0.65,
     )
 
-    # Korrigierte Map-Konfiguration mit MapOptions
+    # In Flet 1.0 Map-Kontrolle ohne veraltete Options-Klassen:
     map_control = fm.Map(
         expand=True,
-        configuration=fm.MapOptions(
-            center=fm.MapLatitudeLongitude(48.7758, 9.1829),  # oder (48.7758, 9.1829)
-            zoom=8,
-        ),
+        initial_center=fm.MapLatitudeLongitude(48.7758, 9.1829),
+        initial_zoom=8,
         layers=[
             fm.TileLayer(
                 url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
