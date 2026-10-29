@@ -7,13 +7,6 @@ import flet_map as fm
 
 from rainviewer_api import available_radar_frames
 
-# Geolocator für Web-Umgebungen absichern
-try:
-    import flet_geolocator as fgeo
-    HAS_GEOLOCATOR = True
-except ImportError:
-    HAS_GEOLOCATOR = False
-
 LOG_LEVEL = logging.INFO
 logging.basicConfig(format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("app.main")
@@ -23,32 +16,21 @@ async def main(page: ft.Page):
     page.title = "Rain Radar"
     page.theme_mode = ft.ThemeMode.SYSTEM
 
-    status = ft.Text("Ready")
-    coordinates = ft.Text("")
+    status = ft.Text("Radar wird geladen…")
     frame_label = ft.Text("")
-    refresh_button = ft.Button(content=ft.Text("Check location and refresh"))
+    refresh_button = ft.Button(content=ft.Text("Neu laden"))
     play_button = ft.Button(content=ft.Text("Play"), disabled=True)
 
-    frame_slider = ft.Slider(
-        value=0,
-        min=0,
-        max=1,
-        divisions=1,
-        disabled=True,
-        visible=False,
-    )
-
-    # Karten-Ebenen definieren (OpenStreetMap + Radar-Overlay)
-    marker_layer = fm.MarkerLayer(markers=[])
+    # Nativer Flet-Kartenbereich (funktioniert im Web und in Android)
     radar_tile_layer = fm.TileLayer(
         url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        opacity=0.6,
+        opacity=0.65,
     )
 
     map_control = fm.Map(
         expand=True,
         configuration=fm.MapConfiguration(
-            initial_center=fm.MapLatitudeLongitude(48.7758, 9.1829), # Standard-Zentrum
+            initial_center=fm.MapLatitudeLongitude(48.7758, 9.1829),  # Standard-Koordinate
             initial_zoom=8,
         ),
         layers=[
@@ -56,7 +38,6 @@ async def main(page: ft.Page):
                 url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
             ),
             radar_tile_layer,
-            marker_layer,
         ],
     )
 
@@ -67,7 +48,7 @@ async def main(page: ft.Page):
         if not frames or not tile_host_url:
             return
         frame = frames[index]
-        # Dynamisches Laden der RainViewer Radar-Kacheln
+        # RainViewer Kacheln dynamisch in der Flet-Karte aktualisieren
         radar_tile_layer.url_template = (
             f"{tile_host_url}{frame['path']}/256/{{z}}/{{x}}/{{y}}/2/1_1.png"
         )
@@ -76,7 +57,7 @@ async def main(page: ft.Page):
 
     async def refresh_location(e=None):
         nonlocal frames, tile_host_url
-        status.value = "Loading RainViewer radar frames…"
+        status.value = "Lade RainViewer Radar-Daten…"
         page.update()
 
         try:
@@ -84,10 +65,10 @@ async def main(page: ft.Page):
             tile_host_url = tile_host.rstrip("/")
             if frames:
                 update_radar_layer(max(0, observed_count - 1))
-                status.value = f"Radar ready · {len(frames)} frames loaded."
+                status.value = f"Radar bereit · {len(frames)} Frames geladen."
         except Exception as exc:
-            log.exception("Error loading rain radar")
-            status.value = f"Could not load radar: {exc}"
+            log.exception("Fehler beim Abrufen der Radar-Daten")
+            status.value = f"Fehler beim Laden: {exc}"
         finally:
             page.update()
 
@@ -100,17 +81,15 @@ async def main(page: ft.Page):
                 [
                     ft.Text("Rain Radar", size=22, weight="bold"),
                     status,
-                    coordinates,
                     ft.Row([refresh_button, play_button, frame_label]),
-                    frame_slider,
-                    map_control,  # Rendert im Browser und in der App!
+                    map_control,  # Rendert direkt auf GitHub Pages!
                 ],
                 expand=True,
             ),
         )
     )
 
-    # Initialer Abruf beim Start
+    # Initialer Datenabruf
     await refresh_location()
 
 
