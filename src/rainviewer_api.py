@@ -1,6 +1,6 @@
 import logging
 
-import httpx2 as httpx
+import httpx
 
 log = logging.getLogger(f"app.{__name__}")
 WEATHER_MAPS_URL = "https://api.rainviewer.com/public/weather-maps.json"
