@@ -47,9 +47,9 @@ jobs:
           sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
 
           # Fix für Asset- & FontManifest-Pfade in Flutter/Flet Web auf GitHub Pages
-          sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/flutter_bootstrap.js
-          sed -i 's/"assetBase":""/"assetBase":"\/rain-radar\/"/g' dist/flutter_bootstrap.js
-          sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' dist/flutter_bootstrap.js || true
+          sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' dist/
+          sed -i 's/"assetBase":""/"assetBase":"\/rain-radar\/"/g' dist/assets/
+          sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' dist/assets/ || true
           sed -i 's/"start_url": "\/"/"start_url": "\/rain-radar\/"/g' dist/manifest.json || true
 
       - name: Setup Pages
