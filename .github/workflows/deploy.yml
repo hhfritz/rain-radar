@@ -44,12 +44,15 @@ jobs:
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
           
-          # 1. Ersetzt JEDES <base href="..."> Tag in index.html garantiert durch /rain-radar/
+          # 1. Base-Tag in index.html sicher anpassen
           sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' dist/index.html
           
-          # 2. Korrigiert JS/JSON Bootstrapper-Konfigurationen
+          # 2. Bootstrapper & Asset-Manifeste im JS-Code korrigieren
           find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
           find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' {} +
+          
+          # 3. Spezifischer Fix für das FontManifest in main.dart.js
+          find dist -type f -name "*.js" -exec sed -i 's/\/assets\/FontManifest.json/\/rain-radar\/assets\/FontManifest.json/g' {} +
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
