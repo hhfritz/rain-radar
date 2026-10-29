@@ -3,23 +3,17 @@ import logging
 from datetime import datetime, timezone
 
 import flet as ft
+import flet_map as fm
 
-# Webview und Geolocator sicher importieren (verhindert Pyodide-Absturz im Web)
+from rainviewer_api import available_radar_frames
+
+# Geolocator für Web-Abstürze absichern
 try:
     import flet_geolocator as fgeo
 
     HAS_GEOLOCATOR = True
 except ImportError:
     HAS_GEOLOCATOR = False
-
-try:
-    import flet_webview as fweb
-
-    HAS_WEBVIEW = True
-except ImportError:
-    HAS_WEBVIEW = False
-
-from rainviewer_api import available_radar_frames
 
 LOG_LEVEL = logging.INFO
 logging.basicConfig(format="%(levelname)s %(name)s: %(message)s")
@@ -30,9 +24,7 @@ async def main(page: ft.Page):
     page.title = "Rain Radar"
     page.theme_mode = ft.ThemeMode.SYSTEM
 
-    is_web = page.web
-
-    status = ft.Text("App gestartet…")
+    status = ft.Text("Checking location access…")
     coordinates = ft.Text("")
     frame_label = ft.Text("")
     refresh_button = ft.Button(content=ft.Text("Refresh"))
@@ -47,28 +39,54 @@ async def main(page: ft.Page):
         visible=False,
     )
 
-    # Kartenbereich für Web vs. App
-    if is_web or not HAS_WEBVIEW:
-        map_area = ft.Container(
-            content=ft.Text(
-                "Die interaktive Kartenansicht ist auf Mobilgeräten verfügbar.",
-                color=ft.Colors.GREY_700,
+    # Nativer Flet-Kartenbereich (funktioniert im Web & auf Android!)
+    marker_layer = fm.MarkerLayer(markers=[])
+    radar_tile_layer = fm.TileLayer(
+        url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        opacity=0.7,
+    )
+
+    map_control = fm.Map(
+        expand=True,
+        configuration=fm.MapConfiguration(
+            initial_center=fm.MapLatitudeLongitude(48.7758, 9.1829),  # Stuttgart Default
+            initial_zoom=8,
+        ),
+        layers=[
+            fm.TileLayer(
+                url_template="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                subdomains=["a", "b", "c"],
             ),
-            padding=20,
-            alignment=ft.alignment.center,
-            expand=True,
+            radar_tile_layer,
+            marker_layer,
+        ],
+    )
+
+    frames: list[dict] = []
+    tile_host_url = ""
+
+    def update_radar_layer(index: int):
+        if not frames or not tile_host_url:
+            return
+        frame = frames[index]
+        # RainViewer Kacheln als Flet Map TileLayer setzen
+        radar_tile_layer.url_template = (
+            f"{tile_host_url}{frame['path']}/256/{{z}}/{{x}}/{{y}}/2/1_1.png"
         )
-    else:
-        webview = fweb.WebView(expand=True)
-        map_area = webview
+        frame_label.value = f"{index + 1}/{len(frames)}"
+        page.update()
 
     async def refresh_location(e=None):
-        status.value = "Daten werden abgerufen…"
+        nonlocal frames, tile_host_url
+        status.value = "Radar-Daten werden geladen…"
         page.update()
+
         try:
-            # Beispielhafte Radar-Frames von API laden
             frames, observed_count, tile_host = await available_radar_frames()
-            status.value = f"Radar bereit · {len(frames)} Frames geladen."
+            tile_host_url = tile_host.rstrip("/")
+            if frames:
+                update_radar_layer(observed_count - 1)
+                status.value = f"Radar bereit · {len(frames)} Frames geladen."
         except Exception as exc:
             log.exception("Fehler beim Abrufen der Radar-Daten")
             status.value = f"Fehler: {exc}"
@@ -85,19 +103,18 @@ async def main(page: ft.Page):
                     ft.Text("Rain Radar", size=24, weight="bold"),
                     status,
                     coordinates,
-                    ft.Row([refresh_button, play_button]),
+                    ft.Row([refresh_button, play_button, frame_label]),
                     frame_slider,
-                    map_area,
+                    map_control,
                 ],
                 expand=True,
             ),
         )
     )
 
-    if is_web:
-        status.value = "Rain Radar Web App erfolgreich geladen!"
-        page.update()
+    # Initialer Start
+    await refresh_location()
 
 
-# WICHTIG FÜR PYODIDE / WEB: ft.app statt ft.run verwenden!
+# Wichtig für Pyodide / WebAssembly
 ft.app(target=main)
