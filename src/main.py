@@ -93,11 +93,13 @@ async def main(page: ft.Page):
     await refresh_location()
 
 
-# Am Ende von main.py:
+# Ersetze das alte ft.app(target=main) am Ende der main.py durch:
 
 if hasattr(ft, "app_async"):
     ft.app_async(target=main)
-elif hasattr(ft, "app"):
+elif hasattr(ft, "app") and callable(ft.app):
     ft.app(target=main)
 else:
-    ft.run(main)
+    # Fallback für neuere Flet 1.0 Strukturen im Browser
+    from flet.app import app_async
+    app_async(target=main)
