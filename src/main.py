@@ -93,4 +93,11 @@ async def main(page: ft.Page):
     await refresh_location()
 
 
-ft.app(target=main)
+# Am Ende von main.py:
+
+if hasattr(ft, "app_async"):
+    ft.app_async(target=main)
+elif hasattr(ft, "app"):
+    ft.app(target=main)
+else:
+    ft.run(main)
