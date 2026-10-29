@@ -10,8 +10,7 @@ dependencies = [
     "flet",
     "flet-geolocator",
     "flet-map>=1.0.4",
-    "flet-webview",
-    "httpx2",
+    "httpx",
 ]
 
 [dependency-groups]
