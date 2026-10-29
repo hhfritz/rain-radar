@@ -44,24 +44,25 @@ jobs:
         run: |
           rm -rf dist src/dist
 
-          - name: Publish Flet App to Web (Static)
-            run: |
-              uv run flet publish src/main.py --base-url /rain-radar/
-              
-              # 1. Pfade in der im src/-Ordner generierten index.html anpassen
-              sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' src/dist/index.html
-              
-              # 2. Flet Configuration & Base-URLs in src/dist korrigieren
-              sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' src/dist/index.html
-              sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' src/dist/index.html
-              sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' src/dist/index.html
-              sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' src/dist/index.html
-              
-              # 3. Bootstrapper-Konfigurationen in JS/JSON anpassen
-              find src/dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
-              
-              # 4. Generierten Build-Ordner auf Root-Ebene verschieben für Pages
-              mv src/dist dist
+      - name: Publish Flet App to Web (Static)
+        run: |
+          uv run flet publish src/main.py --base-url /rain-radar/
+          
+          # 1. Base-Tag in index.html anpassen
+          sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' src/dist/index.html
+          
+          # 2. Flet Configuration & Base-URLs korrigieren
+          sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' src/dist/index.html
+          sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' src/dist/index.html
+          sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' src/dist/index.html
+          sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' src/dist/index.html
+          
+          # 3. Bootstrapper-Konfigurationen anpassen (ohne unmaskierte Klammern)
+          find src/dist -name "*.js" -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
+          find src/dist -name "*.json" -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
+          
+          # 4. Erzeugten Build-Ordner nach dist verschieben
+          mv src/dist dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
