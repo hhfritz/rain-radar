@@ -44,24 +44,26 @@ jobs:
         run: |
           rm -rf dist src/dist
 
-      - name: Publish Flet App to Web (Static)
+      - name: Export requirements from uv and publish Flet App
         run: |
+          # 1. Erzeuge eine explizite requirements.txt im src/-Ordner
+          uv export --format requirements-txt --no-dev -o src/requirements.txt
+          
+          # 2. Flet Publish ausführen
           uv run flet publish src/main.py --base-url /rain-radar/
           
-          # 1. Base-Tag in index.html anpassen
+          # 3. Base-Tag & URLs in index.html korrigieren
           sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' src/dist/index.html
-          
-          # 2. Flet Configuration & Base-URLs korrigieren
           sed -i 's/"entrypointBaseUrl": "\/"/"entrypointBaseUrl": "\/rain-radar\/"/g' src/dist/index.html
           sed -i 's/flet.entrypointBaseUrl="\/"/flet.entrypointBaseUrl="\/rain-radar\/"/g' src/dist/index.html
           sed -i 's/"assetBase": "\/"/"assetBase": "\/rain-radar\/"/g' src/dist/index.html
           sed -i 's/flet.assetBase="\/"/flet.assetBase="\/rain-radar\/"/g' src/dist/index.html
           
-          # 3. Bootstrapper-Konfigurationen anpassen (ohne unmaskierte Klammern)
+          # 4. Bootstrapper-Konfigurationen anpassen
           find src/dist -name "*.js" -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
           find src/dist -name "*.json" -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
           
-          # 4. Erzeugten Build-Ordner nach dist verschieben
+          # 5. Fertigen Build nach dist/ verschieben
           mv src/dist dist
 
       - name: Setup Pages
