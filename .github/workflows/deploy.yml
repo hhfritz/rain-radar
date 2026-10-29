@@ -44,11 +44,10 @@ jobs:
         run: |
           uv run flet publish src/main.py --base-url /rain-radar/
           
-          # 1. Zwingt den Browser, ALLE Ressourcen im Unterordner /rain-radar/ zu suchen
-          sed -i 's/<base href="\/">/<base href="\/rain-radar\/">/g' dist/index.html
-          sed -i 's/<base href="">/<base href="\/rain-radar\/">/g' dist/index.html
+          # 1. Ersetzt JEDES <base href="..."> Tag in index.html garantiert durch /rain-radar/
+          sed -i -E 's/<base href="[^"]*">/<base href="\/rain-radar\/">/g' dist/index.html
           
-          # 2. Korrigiert Pfade in den JS- und JSON-Dateien
+          # 2. Korrigiert JS/JSON Bootstrapper-Konfigurationen
           find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"baseHref":"\/"/"baseHref":"\/rain-radar\/"/g' {} +
           find dist -type f \( -name "*.js" -o -name "*.json" \) -exec sed -i 's/"\/assets\/"/"\/rain-radar\/assets\/"/g' {} +
 
